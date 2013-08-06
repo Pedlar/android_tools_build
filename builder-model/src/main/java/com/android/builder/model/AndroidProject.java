@@ -18,6 +18,7 @@ package com.android.builder.model;
 
 import com.android.annotations.NonNull;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -106,6 +107,13 @@ public interface AndroidProject {
      */
     @NonNull
     List<String> getBootClasspath();
+
+    /**
+     * Returns a list of folders or jar files that contains the framework source code.
+     * @return a list of folders or jar files that contains the framework source code.
+     */
+    @NonNull
+    List<File> getFrameworkSource();
 
     /**
      * Returns a map of {@link SigningConfig}. The key is the signing config name as returned by

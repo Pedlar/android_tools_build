@@ -44,6 +44,8 @@ public class ArtifactInfoImpl implements ArtifactInfo, Serializable {
     @NonNull
     private final String javaCompileTaskName;
     @NonNull
+    private final File generatedManifest;
+    @NonNull
     private final List<File> generatedSourceFolders;
     @NonNull
     private final List<File> generatedResourceFolders;
@@ -60,6 +62,7 @@ public class ArtifactInfoImpl implements ArtifactInfo, Serializable {
                      @NonNull  String packageName,
                      @NonNull  String sourceGenTaskName,
                      @NonNull  String javaCompileTaskName,
+                     @NonNull  File generatedManifest,
                      @NonNull  List<File> generatedSourceFolders,
                      @NonNull  List<File> generatedResourceFolders,
                      @NonNull  File classesFolder,
@@ -71,6 +74,7 @@ public class ArtifactInfoImpl implements ArtifactInfo, Serializable {
         this.packageName = packageName;
         this.sourceGenTaskName = sourceGenTaskName;
         this.javaCompileTaskName = javaCompileTaskName;
+        this.generatedManifest = generatedManifest;
         this.generatedSourceFolders = generatedSourceFolders;
         this.generatedResourceFolders = generatedResourceFolders;
         this.classesFolder = classesFolder;
@@ -116,6 +120,12 @@ public class ArtifactInfoImpl implements ArtifactInfo, Serializable {
     @Override
     public String getAssembleTaskName() {
         return assembleTaskName;
+    }
+
+    @NonNull
+    @Override
+    public File getGeneratedManifest() {
+        return generatedManifest;
     }
 
     @NonNull
