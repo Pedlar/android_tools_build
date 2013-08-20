@@ -15,6 +15,8 @@ tests/3rdPartyTests/*/build
 tests/dependencies/jarProject/build
 tests/flavorlib/*/build
 tests/flavorlibWithFailedTests/*/build
+tests/libProguardJarDep/*/build
+tests/libProguardLibDep/*/build
 tests/libsTest/*/build
 tests/multiproject/*/build
 tests/localJars/*/build

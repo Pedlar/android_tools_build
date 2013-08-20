@@ -58,8 +58,6 @@ import javax.inject.Inject
  */
 public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
 
-    private final static String DIR_BUNDLES = "bundles";
-
     LibraryExtension extension
     BuildTypeData debugBuildTypeData
     BuildTypeData releaseBuildTypeData
@@ -185,11 +183,6 @@ public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
         VariantConfiguration variantConfig = variantData.variantConfiguration
         DefaultBuildType buildType = variantConfig.buildType
 
-        String packageName = variantConfig.getPackageFromManifest()
-        if (packageName == null) {
-            throw new BuildException("Failed to read manifest", null)
-        }
-
         createPrepareDependenciesTask(variantData)
 
         // Add a task to process the manifest(s)
@@ -230,21 +223,6 @@ public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
         // Add a compile task
         createCompileTask(variantData, null/*testedVariant*/)
 
-        // jar the classes.
-        Jar jar = project.tasks.create("package${buildType.name.capitalize()}Jar", Jar);
-        jar.dependsOn variantData.javaCompileTask, variantData.processJavaResources
-        jar.from(variantData.javaCompileTask.outputs);
-        jar.from(variantData.processJavaResources.destinationDir)
-
-        jar.destinationDir = project.file("$project.buildDir/$DIR_BUNDLES/${variantData.dirName}")
-        jar.archiveName = "classes.jar"
-        packageName = packageName.replace('.', '/');
-        jar.exclude(packageName + "/R.class")
-        jar.exclude(packageName + "/R\$*.class")
-        jar.exclude(packageName + "/Manifest.class")
-        jar.exclude(packageName + "/Manifest\$*.class")
-        jar.exclude(packageName + "/BuildConfig.class")
-
         // package the aidl files into the bundle folder
         Sync packageAidl = project.tasks.create("package${variantData.name}Aidl", Sync)
         // packageAidl from 3 sources. the order is important to make sure the override works well.
@@ -260,24 +238,57 @@ public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
         packageRenderscript.into(project.file(
                 "$project.buildDir/$DIR_BUNDLES/${variantData.dirName}/$SdkConstants.FD_RENDERSCRIPT"))
 
-        // package the renderscript header files files into the bundle folder
-        Sync packageLocalJar = project.tasks.create("package${variantData.name}LocalJar", Sync)
-        packageLocalJar.from(getLocalJarFileList(variantData.variantDependency))
-        packageLocalJar.into(project.file(
-                "$project.buildDir/$DIR_BUNDLES/${variantData.dirName}/$SdkConstants.LIBS_FOLDER"))
-
-        // merge the proguard files together
+        // merge consumer proguard files from different build types and flavors
         MergeFileTask mergeFileTask = project.tasks.create("merge${variantData.name}ProguardFiles",
                 MergeFileTask)
         mergeFileTask.conventionMapping.inputFiles = {
-            project.files(variantConfig.getProguardFiles(false)).files }
+            project.files(variantConfig.getConsumerProguardFiles()).files }
         mergeFileTask.conventionMapping.outputFile = {
             project.file(
                     "$project.buildDir/$DIR_BUNDLES/${variantData.dirName}/$LibraryBundle.FN_PROGUARD_TXT")
         }
 
         Zip bundle = project.tasks.create("bundle${variantData.name}", Zip)
-        bundle.dependsOn packageRes, jar, packageAidl, packageRenderscript, packageLocalJar, mergeFileTask
+
+        if (variantConfig.buildType.runProguard) {
+            // run proguard on output of compile task
+            createProguardTasks(variantData, variantConfig)
+
+            // hack since bundle can't depend on variantData.proguardTask
+            mergeFileTask.dependsOn variantData.proguardTask
+
+            bundle.dependsOn packageRes, packageAidl, packageRenderscript, mergeFileTask
+        } else {
+            Sync packageLocalJar = project.tasks.create("package${variantData.name}LocalJar", Sync)
+            packageLocalJar.from(getLocalJarFileList(variantData.variantDependency))
+            packageLocalJar.into(project.file(
+                    "$project.buildDir/$DIR_BUNDLES/${variantData.dirName}/$SdkConstants.LIBS_FOLDER"))
+
+            // jar the classes.
+            Jar jar = project.tasks.create("package${buildType.name.capitalize()}Jar", Jar);
+            jar.dependsOn variantData.javaCompileTask, variantData.processJavaResources
+            jar.from(variantData.javaCompileTask.outputs);
+            jar.from(variantData.processJavaResources.destinationDir)
+
+            jar.destinationDir = project.file("$project.buildDir/$DIR_BUNDLES/${variantData.dirName}")
+            jar.archiveName = "classes.jar"
+
+            String packageName = variantConfig.getPackageFromManifest()
+            if (packageName == null) {
+                throw new BuildException("Failed to read manifest", null)
+            }
+            packageName = packageName.replace('.', '/');
+
+            jar.exclude(packageName + "/R.class")
+            jar.exclude(packageName + "/R\$*.class")
+            jar.exclude(packageName + "/Manifest.class")
+            jar.exclude(packageName + "/Manifest\$*.class")
+            jar.exclude(packageName + "/BuildConfig.class")
+
+            bundle.dependsOn packageRes, jar, packageAidl, packageRenderscript, packageLocalJar,
+                    mergeFileTask
+        }
+
         bundle.setDescription("Assembles a bundle containing the library in ${variantData.name}.");
         bundle.destinationDir = project.file("$project.buildDir/libs")
         bundle.extension = BuilderConstants.EXT_LIB_ARCHIVE

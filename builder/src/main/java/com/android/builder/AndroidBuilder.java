@@ -564,14 +564,14 @@ public class AndroidBuilder {
             command.add(sourceOutputDir);
         }
 
-        if (type != VariantConfiguration.Type.LIBRARY && resPackageOutput != null) {
+        if (resPackageOutput != null) {
             command.add("-F");
             command.add(resPackageOutput);
+        }
 
-            if (proguardOutput != null) {
-                command.add("-G");
-                command.add(proguardOutput);
-            }
+        if (proguardOutput != null) {
+            command.add("-G");
+            command.add(proguardOutput);
         }
 
         // options controlled by build variants

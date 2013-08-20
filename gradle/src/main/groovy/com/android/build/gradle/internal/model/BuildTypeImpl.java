@@ -115,8 +115,15 @@ class BuildTypeImpl implements BuildType, Serializable {
         return Collections.emptyList();
     }
 
+    @NonNull
     @Override
-    public @NonNull List<File> getProguardFiles() {
+    public List<File> getProguardFiles() {
+        return Collections.emptyList();
+    }
+
+    @NonNull
+    @Override
+    public List<File> getConsumerProguardFiles() {
         return Collections.emptyList();
     }
 }

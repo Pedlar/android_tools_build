@@ -33,6 +33,7 @@ public class BaseConfigImpl implements Serializable, BaseConfig {
 
     private final List<String> mBuildConfigLines = Lists.newArrayList();
     private final List<File> mProguardFiles = Lists.newArrayList();
+    private final List<File> mConsumerProguardFiles = Lists.newArrayList();
 
     public void setBuildConfig(String... lines) {
         mBuildConfigLines.clear();
@@ -56,12 +57,21 @@ public class BaseConfigImpl implements Serializable, BaseConfig {
         return mProguardFiles;
     }
 
+    @Override
+    @NonNull
+    public List<File> getConsumerProguardFiles() {
+        return mConsumerProguardFiles;
+    }
+
     protected void _initWith(BaseConfig that) {
         mBuildConfigLines.clear();
         mBuildConfigLines.addAll(that.getBuildConfig());
 
         mProguardFiles.clear();
         mProguardFiles.addAll(that.getProguardFiles());
+
+        mConsumerProguardFiles.clear();
+        mConsumerProguardFiles.addAll(that.getConsumerProguardFiles());
     }
 
     @Override
@@ -73,6 +83,7 @@ public class BaseConfigImpl implements Serializable, BaseConfig {
 
         if (!mBuildConfigLines.equals(that.mBuildConfigLines)) return false;
         if (!mProguardFiles.equals(that.mProguardFiles)) return false;
+        if (!mConsumerProguardFiles.equals(that.mConsumerProguardFiles)) return false;
 
         return true;
     }
@@ -81,6 +92,7 @@ public class BaseConfigImpl implements Serializable, BaseConfig {
     public int hashCode() {
         int result = mBuildConfigLines.hashCode();
         result = 31 * result + mProguardFiles.hashCode();
+        result = 31 * result + mConsumerProguardFiles.hashCode();
         return result;
     }
 }

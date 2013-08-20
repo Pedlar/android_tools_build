@@ -63,4 +63,19 @@ class ProductFlavorDsl extends DefaultProductFlavor {
         }
         return this;
     }
+
+    @NonNull
+    public ProductFlavorDsl consumerProguardFiles(Object... proguardFileArray) {
+        consumerProguardFiles.addAll(fileResolver.resolveFiles(proguardFileArray).files);
+        return this;
+    }
+
+    @NonNull
+    public ProductFlavorDsl setconsumerProguardFiles(Iterable<?> proguardFileIterable) {
+        consumerProguardFiles.clear();
+        for (Object proguardFile : proguardFileIterable) {
+            consumerProguardFiles.add(fileResolver.resolve(proguardFile));
+        }
+        return this;
+    }
 }

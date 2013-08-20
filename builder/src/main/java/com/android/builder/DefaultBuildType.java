@@ -111,7 +111,8 @@ public class DefaultBuildType extends BaseConfigImpl implements BuildType {
     }
 
     @Override
-    @Nullable public String getPackageNameSuffix() {
+    @Nullable
+    public String getPackageNameSuffix() {
         return mPackageNameSuffix;
     }
 
@@ -122,7 +123,8 @@ public class DefaultBuildType extends BaseConfigImpl implements BuildType {
     }
 
     @Override
-    @Nullable public String getVersionNameSuffix() {
+    @Nullable
+    public String getVersionNameSuffix() {
         return mVersionNameSuffix;
     }
 
