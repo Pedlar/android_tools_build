@@ -885,6 +885,21 @@ public class VariantConfiguration implements TestData {
         return fullList;
     }
 
+    @NonNull
+    public List<Object> getConsumerProguardFiles() {
+        List<Object> fullList = Lists.newArrayList();
+
+        // add the config files from the build type, main config and flavors
+        fullList.addAll(mDefaultConfig.getConsumerProguardFiles());
+        fullList.addAll(mBuildType.getConsumerProguardFiles());
+
+        for (DefaultProductFlavor flavor : mFlavorConfigs) {
+            fullList.addAll(flavor.getConsumerProguardFiles());
+        }
+
+        return fullList;
+    }
+
     protected void validate() {
         if (mType != Type.TEST) {
             File manifest = mDefaultSourceProvider.getManifestFile();

@@ -16,10 +16,13 @@
 
 package com.android.build.gradle;
 
-import javax.imageio.ImageIO;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
 
 /**
  * Some manual tests for building projects.
@@ -67,6 +70,29 @@ public class ManualBuildTest extends BuildTest {
         }
     }
 
+    // test whether a library project has its fields ProGuarded
+    public void testLibProguard() throws Exception {
+        File project = new File(testDir, "libProguard");
+        File fileOutput = new File(project, "build/proguard/release");
+
+        runGradleTasks(sdkDir, BasePlugin.GRADLE_MIN_VERSION,
+          project, "clean", "build");
+        checkFile(fileOutput, "mapping.txt", new String[]{"int proguardInt -> a"});
+
+    }
+
+    // test whether proguard.txt has been correctly merged
+    public void testLibProguardConsumerFile() throws Exception {
+        File project = new File(testDir, "libProguardConsumerFiles");
+        File debugFileOutput = new File(project, "build/bundles/debug");
+        File releaseFileOutput = new File(project, "build/bundles/release");
+
+        runGradleTasks(sdkDir, BasePlugin.GRADLE_MIN_VERSION,
+            project, "clean", "build");
+        checkFile(debugFileOutput, "proguard.txt", new String[]{"A"});
+        checkFile(releaseFileOutput, "proguard.txt", new String[]{"A", "B", "C"});
+    }
+
     public void test3rdPartyTests() throws Exception {
         // custom because we want to run deviceCheck even without devices, since we use
         // a fake DeviceProvider that doesn't use a device, but only record the calls made
@@ -85,5 +111,17 @@ public class ManualBuildTest extends BuildTest {
         assertEquals(String.format("Expected: 0x%08X, actual: 0x%08X for file %s",
                 expectedColor, rgb, f),
                 expectedColor, rgb);
+    }
+
+    private static void checkFile(File folder, String fileName, String[] expectedContents)
+            throws IOException {
+        File f = new File(folder, fileName);
+        assertTrue("File '" + f.getAbsolutePath() + "' does not exist.", f.isFile());
+
+        String contents = Files.toString(f, Charsets.UTF_8);
+        for (String expectedContent : expectedContents) {
+            assertTrue("File '" + f.getAbsolutePath() + "' does not contain: " + expectedContent,
+                contents.contains(expectedContent));
+        }
     }
 }

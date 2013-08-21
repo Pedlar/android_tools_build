@@ -40,4 +40,12 @@ public interface BaseConfig {
      */
     @NonNull
     List<File> getProguardFiles();
+
+    /**
+     * Returns the list of proguard rule files for consumers of the library to use.
+     *
+     * @return a non-null list of files.
+     */
+    @NonNull
+    List<File> getConsumerProguardFiles();
 }

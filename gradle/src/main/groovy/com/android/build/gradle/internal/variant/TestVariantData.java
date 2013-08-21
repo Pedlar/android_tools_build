@@ -87,4 +87,9 @@ public class TestVariantData extends ApkVariantData {
     public boolean getZipAlign() {
         return false;
     }
+
+    @Override
+    public boolean getRunProguard() {
+      return false;
+    }
 }

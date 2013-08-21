@@ -34,6 +34,7 @@ import groovy.lang.Closure;
 import org.gradle.api.Task;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.compile.JavaCompile;
+import proguard.gradle.ProGuardTask;
 
 import java.io.File;
 
@@ -57,6 +58,7 @@ public abstract class BaseVariantData {
     public GenerateBuildConfig generateBuildConfigTask;
 
     public JavaCompile javaCompileTask;
+    public ProGuardTask proguardTask;
     public Copy processJavaResources;
 
     private Object outputFile;
@@ -139,7 +141,7 @@ public abstract class BaseVariantData {
     }
 
     public boolean getRunProguard() {
-        return false;
+      return getVariantConfiguration().getBuildType().isRunProguard();
     }
 
     public void setOutputFile(Object file) {

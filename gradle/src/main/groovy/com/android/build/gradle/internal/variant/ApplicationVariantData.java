@@ -41,11 +41,6 @@ public class ApplicationVariantData extends ApkVariantData implements TestedVari
     }
 
     @Override
-    public boolean getRunProguard() {
-        return getVariantConfiguration().getBuildType().isRunProguard();
-    }
-
-    @Override
     public void setTestVariantData(@Nullable TestVariantData testVariantData) {
         this.testVariantData = testVariantData;
     }

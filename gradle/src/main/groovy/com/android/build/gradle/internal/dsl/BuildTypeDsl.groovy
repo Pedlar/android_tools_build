@@ -86,4 +86,19 @@ public class BuildTypeDsl extends DefaultBuildType implements Serializable {
         }
         return this;
     }
+
+    @NonNull
+    public BuildTypeDsl consumerProguardFiles(Object... proguardFileArray) {
+        consumerProguardFiles.addAll(fileResolver.resolveFiles(proguardFileArray).files);
+        return this;
+    }
+
+    @NonNull
+    public BuildTypeDsl setConsumerProguardFiles(Iterable<?> proguardFileIterable) {
+        consumerProguardFiles.clear();
+        for (Object proguardFile : proguardFileIterable) {
+            consumerProguardFiles.add(fileResolver.resolve(proguardFile));
+        }
+        return this;
+    }
 }
