@@ -232,6 +232,9 @@ class AppPlugin extends com.android.build.gradle.BasePlugin implements Plugin<Pr
             }
         }
 
+        // create the lint tasks.
+        createLintTasks()
+
         // create the test tasks.
         createCheckTasks(!productFlavors.isEmpty(), false /*isLibrary*/)
 
