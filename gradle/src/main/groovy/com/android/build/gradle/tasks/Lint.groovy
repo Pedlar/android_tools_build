@@ -33,6 +33,11 @@ public class Lint extends DefaultTask {
     private LintCliFlags flags = new LintCliFlags()
     private LintGradleClient client = new LintGradleClient(flags)
     private IssueRegistry registry = new BuiltinIssueRegistry()
+    private List<File> customRules = new ArrayList<File>()
+
+    public void addCustomRule(File f) {
+        customRules.add(f)
+    }
 
     public void setQuiet() {
         flags.setQuiet(true)
@@ -151,6 +156,8 @@ public class Lint extends DefaultTask {
         for (Reporter reporter : reporters) {
             reporter.setUrlMap(map)
         }
+
+        client.setCustomRules(customRules)
 
         try {
             client.run(registry, Arrays.asList(project.projectDir));

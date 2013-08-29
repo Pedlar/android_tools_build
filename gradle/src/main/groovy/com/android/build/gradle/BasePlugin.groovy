@@ -161,6 +161,7 @@ public abstract class BasePlugin {
     protected Task deviceCheck
     protected Task connectedCheck
     protected Task lint
+    protected Task lintCompile
 
     protected BasePlugin(Instantiator instantiator, ToolingModelBuilderRegistry registry) {
         this.instantiator = instantiator
@@ -763,10 +764,24 @@ public abstract class BasePlugin {
         }
     }
 
+    // TODO - should compile src/lint/java from src/lint/java and jar it into build/lint/lint.jar
+    protected void createLintCompileTask() {
+        lintCompile = project.tasks.create("compileLint", Task)
+        File outputDir = new File("$project.buildDir/lint")
+
+        lintCompile.doFirst{
+            // create the directory for lint output if it does not exist.
+            if (!outputDir.exists()) {
+                boolean mkdirs = outputDir.mkdirs();
+                if (!mkdirs) {
+                    throw new GradleException("Unable to create lint output directory.")
+                }
+            }
+        }
+    }
+
     protected void createLintTasks() {
         File configFile = project.file("$project.projectDir/lint.xml")
-        String outputPath = "$project.buildDir/lint"
-        File outputDir = new File(outputPath)
 
         // for each variant setup a lint task
         int count = variantDataList.size()
@@ -774,11 +789,12 @@ public abstract class BasePlugin {
             final BaseVariantData baseVariantData = variantDataList.get(i)
             String variantName = baseVariantData.computeName()
             Task lintCheck = project.tasks.create("lint" + variantName, Lint)
-            lintCheck.dependsOn baseVariantData.javaCompileTask
+            lintCheck.dependsOn baseVariantData.javaCompileTask, lintCompile
             lint.dependsOn lintCheck
 
-            String outputName = "$outputPath/" + variantName
+            String outputName = "$project.buildDir/lint/" + variantName
             VariantConfiguration config = baseVariantData.variantConfiguration
+            List<LibraryDependency> depList = config.getAllLibraries()
             List<Set<File>> javaSource = Lists.newArrayList()
             List<Set<File>> resourceSource = Lists.newArrayList()
 
@@ -808,11 +824,15 @@ public abstract class BasePlugin {
             }
 
             lintCheck.doFirst {
-                // create the directory for lint output if it does not exist
-                if (!outputDir.exists()) {
-                    boolean mkdirs = outputDir.mkdirs();
-                    if (!mkdirs) {
-                        throw new GradleException("Unable to create lint output directories.")
+                File compiledLintJar = project.file("$project.buildDir/lint/lint.jar");
+                if (compiledLintJar.exists()) {
+                    lintCheck.addCustomRule(compiledLintJar);
+                }
+                // set custom lint rules from library dependencies
+                for (LibraryDependency dep : depList) {
+                    File depLintJar = dep.getLintJar()
+                    if (depLintJar.exists()) {
+                        lintCheck.addCustomRule(depLintJar)
                     }
                 }
 

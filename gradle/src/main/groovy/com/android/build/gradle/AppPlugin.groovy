@@ -232,6 +232,9 @@ class AppPlugin extends com.android.build.gradle.BasePlugin implements Plugin<Pr
             }
         }
 
+        // Add a compile lint task
+        createLintCompileTask()
+
         // create the lint tasks.
         createLintTasks()
 
