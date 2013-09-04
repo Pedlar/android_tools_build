@@ -527,7 +527,7 @@ class AppPlugin extends com.android.build.gradle.BasePlugin implements Plugin<Pr
             @NonNull ApplicationVariantData variant,
             @Nullable Task assembleTask) {
 
-        createPrepareDependenciesTask(variant)
+        createAnchorTasks(variant)
 
         // Add a task to process the manifest(s)
         createProcessManifestTask(variant, "manifests")

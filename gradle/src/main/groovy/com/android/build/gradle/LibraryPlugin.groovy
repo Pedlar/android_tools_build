@@ -183,7 +183,7 @@ public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
         VariantConfiguration variantConfig = variantData.variantConfiguration
         DefaultBuildType buildType = variantConfig.buildType
 
-        createPrepareDependenciesTask(variantData)
+        createAnchorTasks(variantData)
 
         // Add a task to process the manifest(s)
         createProcessManifestTask(variantData, DIR_BUNDLES)
