@@ -51,6 +51,9 @@ public class AutomatedBuildTest extends BuildTest {
         suite.setName("AutomatedBuildTest");
 
         for (String gradleVersion : BasePlugin.GRADLE_SUPPORTED_VERSIONS) {
+            if (isIgnoredGradleVersion(gradleVersion)) {
+                continue;
+            }
             // first the project we build on all available versions of Gradle
             for (String projectName : sBuiltProjects) {
                 String testName = "build_" + projectName + "_" + gradleVersion;

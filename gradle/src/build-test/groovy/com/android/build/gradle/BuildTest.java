@@ -17,8 +17,10 @@
 package com.android.build.gradle;
 
 import com.android.build.gradle.internal.test.BaseTest;
+import com.google.common.collect.Lists;
 
 import java.io.File;
+import java.util.Collection;
 
 /**
  * Base class for build tests.
@@ -27,6 +29,7 @@ import java.io.File;
  * Android Source tree under out/host/<platform>/sdk/... (result of 'make sdk')
  */
 abstract class BuildTest extends BaseTest {
+    private static final Collection<String> IGNORED_GRADLE_VERSIONS = Lists.newArrayList("1.8");
 
     protected File testDir;
     protected File sdkDir;
@@ -35,6 +38,17 @@ abstract class BuildTest extends BaseTest {
     protected void setUp() throws Exception {
         testDir = getTestDir();
         sdkDir = getSdkDir();
+    }
+
+    /**
+     * Indicates whether the given Gradle version should be ignored in tests (for example, when a Gradle version has
+     * not been publicly released yet.)
+     *
+     * @param gradleVersion the given Gradle version.
+     * @return {@code true} if the given Gradle version should be ignored, {@code false} otherwise.
+     */
+    protected static boolean isIgnoredGradleVersion(String gradleVersion) {
+      return IGNORED_GRADLE_VERSIONS.contains(gradleVersion);
     }
 
     protected File buildProject(String name, String gradleVersion) {
