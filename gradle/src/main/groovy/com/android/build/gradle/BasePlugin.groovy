@@ -147,6 +147,7 @@ public abstract class BasePlugin {
     protected DefaultAndroidSourceSet mainSourceSet
     protected DefaultAndroidSourceSet testSourceSet
 
+    protected Task mainPreBuild
     protected Task uninstallAll
     protected Task assembleTest
     protected Task deviceCheck
@@ -191,6 +192,8 @@ public abstract class BasePlugin {
         connectedCheck = project.tasks.create("connectedCheck")
         connectedCheck.description = "Runs all device checks on currently connected devices."
         connectedCheck.group = JavaBasePlugin.VERIFICATION_GROUP
+
+        mainPreBuild = project.tasks.create("preBuild")
 
         project.afterEvaluate {
             createAndroidTasks(false)
@@ -398,6 +401,7 @@ public abstract class BasePlugin {
                 RenderscriptCompile)
         variantData.renderscriptCompileTask = renderscriptTask
 
+        variantData.sourceGenTask.dependsOn renderscriptTask
         renderscriptTask.dependsOn variantData.prepareDependenciesTask
         renderscriptTask.plugin = this
         renderscriptTask.variant = variantData
@@ -485,6 +489,7 @@ public abstract class BasePlugin {
 
         VariantConfiguration variantConfiguration = variantData.variantConfiguration
 
+        variantData.sourceGenTask.dependsOn generateBuildConfigTask
         if (variantConfiguration.type == VariantConfiguration.Type.TEST) {
             // in case of a test project, the manifest is generated so we need to depend
             // on its creation.
@@ -519,6 +524,8 @@ public abstract class BasePlugin {
         def processResources = project.tasks.create("process${variantData.name}Resources",
                 ProcessAndroidResources)
         variantData.processResourcesTask = processResources
+
+        variantData.sourceGenTask.dependsOn processResources
         processResources.dependsOn variantData.processManifestTask, variantData.mergeResourcesTask, variantData.mergeAssetsTask
 
         processResources.plugin = this
@@ -597,6 +604,8 @@ public abstract class BasePlugin {
 
         def compileTask = project.tasks.create("compile${variantData.name}Aidl", AidlCompile)
         variantData.aidlCompileTask = compileTask
+
+        variantData.sourceGenTask.dependsOn compileTask
         variantData.aidlCompileTask.dependsOn variantData.prepareDependenciesTask
 
         compileTask.plugin = this
@@ -617,7 +626,7 @@ public abstract class BasePlugin {
                                      BaseVariantData testedVariantData) {
         def compileTask = project.tasks.create("compile${variantData.name}", JavaCompile)
         variantData.javaCompileTask = compileTask
-        compileTask.dependsOn variantData.processResourcesTask, variantData.generateBuildConfigTask, variantData.aidlCompileTask
+        compileTask.dependsOn variantData.sourceGenTask
 
         VariantConfiguration config = variantData.variantConfiguration
 
@@ -693,7 +702,7 @@ public abstract class BasePlugin {
                     "Tested Variant '${testedVariantData.name}' is not configured to create a signed APK.")
         }
 
-        createPrepareDependenciesTask(variantData)
+        createAnchorTasks(variantData)
 
         // Add a task to process the manifest
         createProcessTestManifestTask(variantData, "manifests")
@@ -1217,16 +1226,15 @@ public abstract class BasePlugin {
         signingReportTask.setGroup("Android")
     }
 
+    protected void createAnchorTasks(@NonNull BaseVariantData variantData) {
+        variantData.preBuildTask = project.tasks.create("pre${variantData.name}Build")
+        variantData.preBuildTask.dependsOn mainPreBuild
 
-    //----------------------------------------------------------------------------------------------
-    //------------------------------ START DEPENDENCY STUFF ----------------------------------------
-    //----------------------------------------------------------------------------------------------
-
-
-    protected void createPrepareDependenciesTask(@NonNull BaseVariantData variantData) {
         def prepareDependenciesTask = project.tasks.create("prepare${variantData.name}Dependencies",
                 PrepareDependenciesTask)
+
         variantData.prepareDependenciesTask = prepareDependenciesTask
+        prepareDependenciesTask.dependsOn variantData.preBuildTask
 
         prepareDependenciesTask.plugin = this
         prepareDependenciesTask.variant = variantData
@@ -1237,19 +1245,28 @@ public abstract class BasePlugin {
         prepareDependenciesTask.addChecker(configurationDependencies.checker)
 
         for (LibraryDependencyImpl lib : configurationDependencies.libraries) {
-            addDependencyToPrepareTask(prepareDependenciesTask, lib)
+            addDependencyToPrepareTask(variantData, prepareDependenciesTask, lib)
         }
+
+        // also create sourceGenTask
+        variantData.sourceGenTask = project.tasks.create("generate${variantData.name}Sources")
     }
 
-    def addDependencyToPrepareTask(PrepareDependenciesTask prepareDependenciesTask,
-                                   LibraryDependencyImpl lib) {
+    //----------------------------------------------------------------------------------------------
+    //------------------------------ START DEPENDENCY STUFF ----------------------------------------
+    //----------------------------------------------------------------------------------------------
+
+    def addDependencyToPrepareTask(@NonNull BaseVariantData variantData,
+                                   @NonNull PrepareDependenciesTask prepareDependenciesTask,
+                                   @NonNull LibraryDependencyImpl lib) {
         def prepareLibTask = prepareTaskMap.get(lib)
         if (prepareLibTask != null) {
             prepareDependenciesTask.dependsOn prepareLibTask
+            prepareLibTask.dependsOn variantData.preBuildTask
         }
 
         for (LibraryDependencyImpl childLib : lib.dependencies) {
-            addDependencyToPrepareTask(prepareDependenciesTask, childLib)
+            addDependencyToPrepareTask(variantData, prepareDependenciesTask, childLib)
         }
     }
 

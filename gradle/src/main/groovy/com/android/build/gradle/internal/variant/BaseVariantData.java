@@ -47,7 +47,9 @@ public abstract class BaseVariantData {
     private final VariantConfiguration variantConfiguration;
     private VariantDependencies variantDependency;
 
+    public Task preBuildTask;
     public PrepareDependenciesTask prepareDependenciesTask;
+    public Task sourceGenTask;
 
     public ProcessManifest processManifestTask;
     public RenderscriptCompile renderscriptCompileTask;
