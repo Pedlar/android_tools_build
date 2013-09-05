@@ -49,6 +49,9 @@ public class DeviceTest extends BuildTest {
         suite.setName("DeviceTest");
 
         for (String gradleVersion : BasePlugin.GRADLE_SUPPORTED_VERSIONS) {
+            if (isIgnoredGradleVersion(gradleVersion)) {
+                continue;
+            }
             // first the project we build on all available versions of Gradle
             for (String projectName : sBuiltProjects) {
                 String testName = "check_" + projectName + "_" + gradleVersion;
