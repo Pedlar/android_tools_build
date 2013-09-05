@@ -87,6 +87,7 @@ public class ModelBuilder implements ToolingModelBuilder {
                 compileTarget,
                 bootClasspath,
                 cloneSigningConfigs(signingConfigs),
+                basePlugin.unresolvedDependencies,
                 libPlugin != null)
                     .setDefaultConfig(createPFC(basePlugin.defaultConfigData))
 

@@ -18,6 +18,7 @@ package com.android.builder.model;
 
 import com.android.annotations.NonNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ import java.util.Map;
  * the module is an app project or a library project.
  */
 public interface AndroidProject {
+    String BUILD_MODEL_ONLY_SYSTEM_PROPERTY =  "android.build.model.only";
 
     /**
      * Returns the model version. This is a string in the format X.Y.Z
@@ -121,4 +123,17 @@ public interface AndroidProject {
      */
     @NonNull
     AaptOptions getAaptOptions();
+
+    /**
+     * Returns the dependencies that were not successfully resolved. The returned list gets
+     * populated only if the system property {@link #BUILD_MODEL_ONLY_SYSTEM_PROPERTY} has been
+     * set to {@code true}.
+     * <p>
+     * Each value of the collection has the format group:name:version, for example:
+     * com.google.guava:guava:15.0.2
+     *
+     * @return the dependencies that were not successfully resolved.
+     */
+    @NonNull
+    Collection<String> getUnresolvedDependencies();
 }

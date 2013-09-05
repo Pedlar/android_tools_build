@@ -26,6 +26,7 @@ import com.android.builder.model.SigningConfig;
 import com.google.common.collect.Maps;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +46,8 @@ class DefaultAndroidProject implements AndroidProject, Serializable {
     private final List<String> bootClasspath;
     @NonNull
     private final Map<String, SigningConfig> signingConfigs;
+    @NonNull
+    private final Collection<String> unresolvedDependencies;
     private final boolean isLibrary;
 
     private final Map<String, BuildTypeContainer> buildTypes = Maps.newHashMap();
@@ -57,12 +60,14 @@ class DefaultAndroidProject implements AndroidProject, Serializable {
                           @NonNull String name, @NonNull String compileTarget,
                           @NonNull List<String> bootClasspath,
                           @NonNull Map<String, SigningConfig> signingConfigs,
+                          @NonNull Collection<String> unresolvedDependencies,
                           boolean isLibrary) {
         this.modelVersion = modelVersion;
         this.name = name;
         this.compileTarget = compileTarget;
         this.bootClasspath = bootClasspath;
         this.signingConfigs = signingConfigs;
+        this.unresolvedDependencies = unresolvedDependencies;
         this.isLibrary = isLibrary;
     }
 
@@ -155,5 +160,11 @@ class DefaultAndroidProject implements AndroidProject, Serializable {
     @Override
     public AaptOptions getAaptOptions() {
         return null;
+    }
+
+    @NonNull
+    @Override
+    public Collection<String> getUnresolvedDependencies() {
+        return unresolvedDependencies;
     }
 }
