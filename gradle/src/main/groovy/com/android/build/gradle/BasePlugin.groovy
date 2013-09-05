@@ -67,6 +67,7 @@ import com.android.builder.SdkParser
 import com.android.builder.VariantConfiguration
 import com.android.builder.dependency.JarDependency
 import com.android.builder.dependency.LibraryDependency
+import com.android.builder.model.AndroidProject
 import com.android.builder.model.ProductFlavor
 import com.android.builder.model.SigningConfig
 import com.android.builder.model.SourceProvider
@@ -78,6 +79,7 @@ import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.google.common.collect.Multimap
+import com.google.common.collect.Sets
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -89,9 +91,11 @@ import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.SelfResolvingDependency
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.artifacts.result.ResolvedModuleVersionResult
+import org.gradle.api.artifacts.result.UnresolvedDependencyResult
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.internal.reflect.Instantiator
@@ -144,6 +148,8 @@ public abstract class BasePlugin {
     private boolean hasCreatedTasks = false
 
     private ProductFlavorData<DefaultProductFlavor> defaultConfigData
+    private final Collection<String> unresolvedDependencies = Sets.newHashSet();
+
     protected DefaultAndroidSourceSet mainSourceSet
     protected DefaultAndroidSourceSet testSourceSet
 
@@ -266,6 +272,10 @@ public abstract class BasePlugin {
 
     ProductFlavorData getDefaultConfigData() {
         return defaultConfigData
+    }
+
+    Collection<String> getUnresolvedDependencies() {
+        return unresolvedDependencies
     }
 
     SdkParser getSdkParser() {
@@ -1321,14 +1331,23 @@ public abstract class BasePlugin {
 
         variantDeps.checker = new DependencyChecker(variantDeps, logger)
 
+        Set<String> currentUnresolvedDependencies = Sets.newHashSet()
+
         // TODO - defer downloading until required -- This is hard to do as we need the info to build the variant config.
         List<LibraryDependencyImpl> bundles = []
         List<JarDependency> jars = []
         List<JarDependency> localJars = []
         collectArtifacts(compileClasspath, artifacts)
-        compileClasspath.incoming.resolutionResult.root.dependencies.each { ResolvedDependencyResult dep ->
-            addDependency(dep.selected, variantDeps, bundles, jars, modules,
-                    artifacts, reverseMap)
+        def dependencies = compileClasspath.incoming.resolutionResult.root.dependencies
+        dependencies.each { DependencyResult dep ->
+            if (dep instanceof ResolvedDependencyResult) {
+                addDependency(dep.selected, variantDeps, bundles, jars, modules, artifacts, reverseMap)
+            } else if (dep instanceof UnresolvedDependencyResult) {
+                def attempted = dep.attempted;
+                if (attempted != null) {
+                    currentUnresolvedDependencies.add(attempted.toString())
+                }
+            }
         }
 
         // also need to process local jar files, as they are not processed by the
@@ -1348,21 +1367,26 @@ public abstract class BasePlugin {
         // in compile and remove all dependencies already in compile to get package-only jar
         // files.
         Configuration packageClasspath = variantDeps.packageConfiguration
-        Set<File> compileFiles = compileClasspath.files
-        Set<File> packageFiles = packageClasspath.files
 
-        for (File f : packageFiles) {
-            if (compileFiles.contains(f)) {
-                continue
-            }
+        if (currentUnresolvedDependencies.isEmpty()) {
+            Set<File> compileFiles = compileClasspath.files
+            Set<File> packageFiles = packageClasspath.files
 
-            if (f.getName().toLowerCase().endsWith(".jar")) {
-                jars.add(new JarDependency(f, false /*compiled*/, true /*packaged*/))
-            } else {
-                throw new RuntimeException("Package-only dependency '" +
-                        f.absolutePath +
-                        "' is not supported")
+            for (File f : packageFiles) {
+                if (compileFiles.contains(f)) {
+                    continue
+                }
+
+                if (f.getName().toLowerCase().endsWith(".jar")) {
+                    jars.add(new JarDependency(f, false /*compiled*/, true /*packaged*/))
+                } else {
+                    throw new RuntimeException("Package-only dependency '" +
+                            f.absolutePath +
+                            "' is not supported")
+                }
             }
+        } else {
+            unresolvedDependencies.addAll(currentUnresolvedDependencies)
         }
 
         variantDeps.addLibraries(bundles)
@@ -1383,7 +1407,15 @@ public abstract class BasePlugin {
 
     static def collectArtifacts(Configuration configuration, Map<ModuleVersionIdentifier,
                          List<ResolvedArtifact>> artifacts) {
-        configuration.resolvedConfiguration.resolvedArtifacts.each { ResolvedArtifact artifact ->
+        boolean buildModelOnly = Boolean.getBoolean(AndroidProject.BUILD_MODEL_ONLY_SYSTEM_PROPERTY);
+        def allArtifacts
+        if (buildModelOnly) {
+            allArtifacts = configuration.resolvedConfiguration.lenientConfiguration.getArtifacts(Specs.satisfyAll())
+        } else {
+            allArtifacts = configuration.resolvedConfiguration.resolvedArtifacts
+        }
+
+        allArtifacts.each { ResolvedArtifact artifact ->
             def id = artifact.moduleVersion.id
             List<ResolvedArtifact> moduleArtifacts = artifacts[id]
             if (moduleArtifacts == null) {
