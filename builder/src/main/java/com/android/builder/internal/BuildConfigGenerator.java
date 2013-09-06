@@ -76,7 +76,15 @@ public class BuildConfigGenerator {
     public void generate(@Nullable List<String> additionalLines) throws IOException {
         Map<String, String> map = Maps.newHashMap();
         map.put(PH_PACKAGE, mAppPackage);
-        map.put(PH_DEBUG, Boolean.toString(mDebug));
+
+        // Hack (see IDEA-100046): We want to avoid reporting "condition is always true"
+        // from the data flow inspection, so use a non-constant value. However, that defeats
+        // the purpose of this flag (when not in debug mode, if (BuildConfig.DEBUG && ...) will
+        // be completely removed by the compiler), so as a hack we do it only for the case
+        // where debug is true, which is the most likely scenario while the user is looking
+        // at source code.
+        //map.put(PH_DEBUG, Boolean.toString(mDebug));
+        map.put(PH_DEBUG, mDebug ? "Boolean.parseBoolean(\"true\")" : "false");
 
         if (additionalLines != null) {
             StringBuilder sb = new StringBuilder();
