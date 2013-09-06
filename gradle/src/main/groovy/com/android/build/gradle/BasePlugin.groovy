@@ -126,7 +126,7 @@ public abstract class BasePlugin {
     protected final static String DIR_BUNDLES = "bundles";
 
     public static final String GRADLE_MIN_VERSION = "1.6"
-    public static final String[] GRADLE_SUPPORTED_VERSIONS = [ GRADLE_MIN_VERSION, "1.7" ]
+    public static final String[] GRADLE_SUPPORTED_VERSIONS = [ GRADLE_MIN_VERSION, "1.7", "1.8" ]
 
     public static final String INSTALL_GROUP = "Install"
 
