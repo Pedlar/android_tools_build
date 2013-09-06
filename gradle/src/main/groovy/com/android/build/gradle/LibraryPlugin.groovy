@@ -149,6 +149,9 @@ public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
 
         createTestVariant(testVariantData, debugVariantData)
 
+        // create the lint tasks.
+        createLintTasks()
+
         // create the test tasks.
         createCheckTasks(false /*hasFlavors*/, true /*isLibrary*/)
 

@@ -53,6 +53,7 @@ import com.android.build.gradle.internal.variant.TestedVariantData
 import com.android.build.gradle.tasks.AidlCompile
 import com.android.build.gradle.tasks.Dex
 import com.android.build.gradle.tasks.GenerateBuildConfig
+import com.android.build.gradle.tasks.Lint
 import com.android.build.gradle.tasks.MergeAssets
 import com.android.build.gradle.tasks.MergeResources
 import com.android.build.gradle.tasks.PackageApplication
@@ -159,6 +160,7 @@ public abstract class BasePlugin {
     protected Task assembleTest
     protected Task deviceCheck
     protected Task connectedCheck
+    protected Task lint
 
     protected BasePlugin(Instantiator instantiator, ToolingModelBuilderRegistry registry) {
         this.instantiator = instantiator
@@ -201,6 +203,11 @@ public abstract class BasePlugin {
         connectedCheck.group = JavaBasePlugin.VERIFICATION_GROUP
 
         mainPreBuild = project.tasks.create("preBuild")
+
+        lint = project.tasks.create("lint")
+        lint.description = "Runs lint on all variants."
+        lint.group = JavaBasePlugin.VERIFICATION_GROUP
+        project.tasks.check.dependsOn lint
 
         project.afterEvaluate {
             createAndroidTasks(false)
@@ -753,6 +760,77 @@ public abstract class BasePlugin {
 
         if (assembleTest != null) {
             assembleTest.dependsOn variantData.assembleTask
+        }
+    }
+
+    protected void createLintTasks() {
+        File configFile = project.file("$project.projectDir/lint.xml")
+        String outputPath = "$project.buildDir/lint"
+        File outputDir = new File(outputPath)
+
+        // for each variant setup a lint task
+        int count = variantDataList.size()
+        for (int i = 0 ; i < count ; i++) {
+            final BaseVariantData baseVariantData = variantDataList.get(i)
+            String variantName = baseVariantData.computeName()
+            Task lintCheck = project.tasks.create("lint" + variantName, Lint)
+            lintCheck.dependsOn baseVariantData.javaCompileTask
+            lint.dependsOn lintCheck
+
+            String outputName = "$outputPath/" + variantName
+            VariantConfiguration config = baseVariantData.variantConfiguration
+            List<Set<File>> javaSource = Lists.newArrayList()
+            List<Set<File>> resourceSource = Lists.newArrayList()
+
+            // set the java and res source of this variant's flavors
+            Iterator<SourceProvider> flavorSources = config.flavorSourceSets.iterator()
+            SourceProvider source
+            while (flavorSources.hasNext()) {
+                source = flavorSources.next()
+                javaSource.add(source.javaDirectories)
+                resourceSource.add(source.resDirectories)
+            }
+
+            javaSource.add(config.defaultSourceSet.javaDirectories)
+            if (config.getType() != VariantConfiguration.Type.TEST) {
+                javaSource.add(config.buildTypeSourceSet.javaDirectories)
+            }
+
+            resourceSource.add(config.defaultSourceSet.resDirectories)
+            if (config.getType() != VariantConfiguration.Type.TEST) {
+                resourceSource.add(config.buildTypeSourceSet.resDirectories)
+            }
+            File genRes = baseVariantData.renderscriptCompileTask.getResOutputDir()
+            if (genRes != null) {
+                resourceSource.add(
+                    Collections.singleton(genRes)
+                )
+            }
+
+            lintCheck.doFirst {
+                // create the directory for lint output if it does not exist
+                if (!outputDir.exists()) {
+                    boolean mkdirs = outputDir.mkdirs();
+                    if (!mkdirs) {
+                        throw new GradleException("Unable to create lint output directories.")
+                    }
+                }
+
+                // set lint output options
+                lintCheck.setHtmlOutput(project.file(outputName + "Output.html"))
+                lintCheck.setXmlOutput(project.file(outputName + "Output.xml"))
+                lintCheck.setQuiet()
+
+                // set lint enabled checks
+                if (configFile.exists()) {
+                    lintCheck.setConfig(configFile)
+                }
+
+                // set lint project options
+                lintCheck.setSources(javaSource)
+                lintCheck.setClasspath("$project.buildDir/classes/$baseVariantData.dirName")
+                lintCheck.setLintResources(resourceSource)
+            }
         }
     }
 
