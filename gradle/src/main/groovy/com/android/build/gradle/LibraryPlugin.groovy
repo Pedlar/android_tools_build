@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.android.build.gradle
+
 import com.android.SdkConstants
 import com.android.annotations.NonNull
 import com.android.annotations.Nullable
@@ -45,6 +46,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.plugins.MavenPlugin
+import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
@@ -53,6 +55,7 @@ import org.gradle.tooling.BuildException
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry
 
 import javax.inject.Inject
+
 /**
  * Gradle plugin class for 'library' projects.
  */
@@ -124,6 +127,9 @@ public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
                 debugBuildTypeData)
         LibraryVariantData releaseVariantData = createLibVariant(defaultConfigData,
                 releaseBuildTypeData)
+
+        // Add a compile lint task before library is bundled
+        createLintCompileTask()
 
         // Need to create the tasks for these before doing the test variant as it
         // references the debug variant and its output
@@ -251,6 +257,12 @@ public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
                     "$project.buildDir/$DIR_BUNDLES/${variantData.dirName}/$LibraryBundle.FN_PROGUARD_TXT")
         }
 
+        // copy lint.jar into the bundle folder
+        Copy lintCopy = project.tasks.create("copy${variantData.name}Lint", Copy)
+        lintCopy.dependsOn lintCompile
+        lintCopy.from("$project.buildDir/lint/lint.jar")
+        lintCopy.into("$project.buildDir/$DIR_BUNDLES/$variantData.dirName")
+
         Zip bundle = project.tasks.create("bundle${variantData.name}", Zip)
 
         if (variantConfig.buildType.runProguard) {
@@ -260,7 +272,7 @@ public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
             // hack since bundle can't depend on variantData.proguardTask
             mergeFileTask.dependsOn variantData.proguardTask
 
-            bundle.dependsOn packageRes, packageAidl, packageRenderscript, mergeFileTask
+            bundle.dependsOn packageRes, packageAidl, packageRenderscript, mergeFileTask, lintCopy
         } else {
             Sync packageLocalJar = project.tasks.create("package${variantData.name}LocalJar", Sync)
             packageLocalJar.from(getLocalJarFileList(variantData.variantDependency))
@@ -289,7 +301,7 @@ public class LibraryPlugin extends BasePlugin implements Plugin<Project> {
             jar.exclude(packageName + "/BuildConfig.class")
 
             bundle.dependsOn packageRes, jar, packageAidl, packageRenderscript, packageLocalJar,
-                    mergeFileTask
+                    mergeFileTask, lintCopy
         }
 
         bundle.setDescription("Assembles a bundle containing the library in ${variantData.name}.");
