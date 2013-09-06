@@ -73,6 +73,12 @@ public interface ArtifactInfo {
     String getSourceGenTaskName();
 
     /**
+     * @return the name of the task used to compile Java code.
+     */
+    @NonNull
+    String getJavaCompileTaskName();
+
+    /**
      * Returns the name of the task used to generate the artifact.
      *
      * @return the name of the task.

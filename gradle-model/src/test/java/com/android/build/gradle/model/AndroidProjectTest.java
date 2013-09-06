@@ -202,6 +202,7 @@ public class AndroidProjectTest extends TestCase {
         assertTrue("Debug signed check", debugMainInfo.isSigned());
         assertEquals("Debug signingConfig name", "myConfig", debugMainInfo.getSigningConfigName());
         assertEquals("Debug sourceGenTask", "generateDebugSources", debugMainInfo.getSourceGenTaskName());
+        assertEquals("Debug javaCompileTask", "compileDebug", debugMainInfo.getJavaCompileTaskName());
 
         // this variant is tested.
         ArtifactInfo debugTestInfo = debugVariant.getTestArtifactInfo();
@@ -212,6 +213,7 @@ public class AndroidProjectTest extends TestCase {
         assertTrue("Test signed check", debugTestInfo.isSigned());
         assertEquals("Test signingConfig name", "myConfig", debugTestInfo.getSigningConfigName());
         assertEquals("Test sourceGenTask", "generateTestSources", debugTestInfo.getSourceGenTaskName());
+        assertEquals("Test javaCompileTask", "compileTest", debugTestInfo.getJavaCompileTaskName());
 
         // release variant, not tested.
         Variant releaseVariant = variants.get("Release");
@@ -224,6 +226,7 @@ public class AndroidProjectTest extends TestCase {
         assertFalse("Release signed check", relMainInfo.isSigned());
         assertNull("Release signingConfig name", relMainInfo.getSigningConfigName());
         assertEquals("Release sourceGenTask", "generateReleaseSources", relMainInfo.getSourceGenTaskName());
+        assertEquals("Release javaCompileTask", "compileRelease", relMainInfo.getJavaCompileTaskName());
 
         ArtifactInfo relTestInfo = releaseVariant.getTestArtifactInfo();
         assertNull("Release test info null-check", relTestInfo);

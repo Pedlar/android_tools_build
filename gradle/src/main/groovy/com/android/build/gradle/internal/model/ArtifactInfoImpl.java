@@ -42,6 +42,8 @@ public class ArtifactInfoImpl implements ArtifactInfo, Serializable {
     @NonNull
     private final String sourceGenTaskName;
     @NonNull
+    private final String javaCompileTaskName;
+    @NonNull
     private final List<File> generatedSourceFolders;
     @NonNull
     private final List<File> generatedResourceFolders;
@@ -57,6 +59,7 @@ public class ArtifactInfoImpl implements ArtifactInfo, Serializable {
                      @Nullable String signingConfigName,
                      @NonNull  String packageName,
                      @NonNull  String sourceGenTaskName,
+                     @NonNull  String javaCompileTaskName,
                      @NonNull  List<File> generatedSourceFolders,
                      @NonNull  List<File> generatedResourceFolders,
                      @NonNull  File classesFolder,
@@ -67,6 +70,7 @@ public class ArtifactInfoImpl implements ArtifactInfo, Serializable {
         this.signingConfigName = signingConfigName;
         this.packageName = packageName;
         this.sourceGenTaskName = sourceGenTaskName;
+        this.javaCompileTaskName = javaCompileTaskName;
         this.generatedSourceFolders = generatedSourceFolders;
         this.generatedResourceFolders = generatedResourceFolders;
         this.classesFolder = classesFolder;
@@ -100,6 +104,12 @@ public class ArtifactInfoImpl implements ArtifactInfo, Serializable {
     @Override
     public String getSourceGenTaskName() {
         return sourceGenTaskName;
+    }
+
+    @NonNull
+    @Override
+    public String getJavaCompileTaskName() {
+        return javaCompileTaskName;
     }
 
     @NonNull
