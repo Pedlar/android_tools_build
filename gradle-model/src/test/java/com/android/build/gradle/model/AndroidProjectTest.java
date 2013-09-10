@@ -693,13 +693,20 @@ public class AndroidProjectTest extends TestCase {
         }
 
         void test() {
+            ArtifactInfo artifact = variant.getMainArtifactInfo();
+            assertNotNull("Main Artifact null-check", artifact);
+
             String variantName = variant.getName();
             File build = new File(projectDir,  "build");
             File apk = new File(build, "apk/" + outputFileName);
-            assertEquals(variantName + " output", apk, variant.getMainArtifactInfo().getOutputFile());
+            assertEquals(variantName + " output", apk, artifact.getOutputFile());
 
-            List<File> sourceFolders = variant.getMainArtifactInfo().getGeneratedSourceFolders();
+            List<File> sourceFolders = artifact.getGeneratedSourceFolders();
             assertEquals("Gen src Folder count", 4, sourceFolders.size());
+
+            File manifest = artifact.getGeneratedManifest();
+            assertNotNull(manifest);
+            assertTrue(manifest.isFile());
         }
     }
 

@@ -87,6 +87,12 @@ public interface ArtifactInfo {
     String getAssembleTaskName();
 
     /**
+     * The generated manifest for this variant's artifact.
+     */
+    @NonNull
+    File getGeneratedManifest();
+
+    /**
      * Returns all the source folders that are generated. This is typically folders for the R,
      * the aidl classes, and the renderscript classes.
      *
