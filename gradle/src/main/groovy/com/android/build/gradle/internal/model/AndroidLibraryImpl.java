@@ -35,6 +35,8 @@ public class AndroidLibraryImpl implements AndroidLibrary, Serializable {
     @NonNull
     private final File folder;
     @NonNull
+    private final File manifest;
+    @NonNull
     private final File jarFile;
     @NonNull
     private final List<File> localJars;
@@ -61,6 +63,7 @@ public class AndroidLibraryImpl implements AndroidLibrary, Serializable {
         this.dependencies = dependencies;
         bundle = libraryDependency.getBundle();
         folder = libraryDependency.getFolder();
+        manifest = libraryDependency.getManifest();
         jarFile = libraryDependency.getJarFile();
         localJars = libraryDependency.getLocalJars();
         resFolder = libraryDependency.getResFolder();
@@ -96,6 +99,12 @@ public class AndroidLibraryImpl implements AndroidLibrary, Serializable {
     @Override
     public List<? extends AndroidLibrary> getLibraryDependencies() {
         return dependencies;
+    }
+
+    @NonNull
+    @Override
+    public File getManifest() {
+        return manifest;
     }
 
     @NonNull
