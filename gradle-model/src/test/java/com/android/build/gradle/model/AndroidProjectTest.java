@@ -706,7 +706,6 @@ public class AndroidProjectTest extends TestCase {
 
             File manifest = artifact.getGeneratedManifest();
             assertNotNull(manifest);
-            assertTrue(manifest.isFile());
         }
     }
 
