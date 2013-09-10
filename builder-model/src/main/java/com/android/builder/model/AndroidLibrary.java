@@ -55,6 +55,12 @@ public interface AndroidLibrary {
     List<? extends AndroidLibrary> getLibraryDependencies();
 
     /**
+     * Returns the location of the manifest.
+     */
+    @NonNull
+    File getManifest();
+
+    /**
      * Returns the location of the jar file to use for packaging.
      *
      * @return a File for the jar file. The file may not point to an existing file.
