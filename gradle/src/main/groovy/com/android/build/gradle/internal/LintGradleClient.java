@@ -14,27 +14,36 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal
+package com.android.build.gradle.internal;
 
-import com.android.annotations.NonNull
-import com.android.tools.lint.LintCliClient
-import com.android.tools.lint.LintCliFlags
-import com.android.tools.lint.detector.api.Project
+import com.google.common.collect.Lists;
 
-// TODO - should override some methods to be more Gradle compatible or extend LintClient directly
+import com.android.annotations.NonNull;
+import com.android.tools.lint.LintCliClient;
+import com.android.tools.lint.LintCliFlags;
+import com.android.tools.lint.detector.api.Project;
+
+import java.io.File;
+import java.util.List;
+
 public class LintGradleClient extends LintCliClient {
-    private List<File> mCustomRules = []
+    private List<File> mCustomRules = Lists.newArrayList();
 
     public LintGradleClient(LintCliFlags flags) {
         super(flags);
     }
 
     public void setCustomRules(List<File> customRules) {
-        mCustomRules = customRules
+        mCustomRules = customRules;
     }
 
     @Override
     public List<File> findRuleJars(@NonNull Project project) {
-        return mCustomRules
+        return mCustomRules;
+    }
+
+    @Override
+    protected Project createProject(@NonNull File dir, @NonNull File referenceDir) {
+        return new LintGradleProject(this, dir, referenceDir);
     }
 }
