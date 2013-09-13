@@ -1,3 +1,14 @@
+0.5.7
+
+- Proguard support for libraries.
+  Note the current DSL property 'proguardFiles' for library now sets the proguard rule file used when proguarding the library code.
+  The new property 'consumerProguardFiles' is used to package a rule file inside an aar.
+- Improved IDE support, including loading project with broken dependencies and anchor task to generate Java code
+- New hook tasks: preBuild and prebuild<VariantName>
+- First lint integration. This is a work in progress and therefore the lint task is not added to the check task.
+- Enable compatibility with 1.8
+
+
 0.5.6
 
 - Enable support for 1.7
