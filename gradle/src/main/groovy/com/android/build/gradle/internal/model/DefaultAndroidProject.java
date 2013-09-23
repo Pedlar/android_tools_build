@@ -17,8 +17,10 @@
 package com.android.build.gradle.internal.model;
 
 import com.android.annotations.NonNull;
+import com.android.build.gradle.internal.CompileOptions;
 import com.android.builder.model.AndroidProject;
 import com.android.builder.model.BuildTypeContainer;
+import com.android.builder.model.JavaCompileOptions;
 import com.android.builder.model.ProductFlavorContainer;
 import com.android.builder.model.Variant;
 import com.android.builder.model.AaptOptions;
@@ -51,6 +53,8 @@ class DefaultAndroidProject implements AndroidProject, Serializable {
     private final Map<String, SigningConfig> signingConfigs;
     @NonNull
     private final Collection<String> unresolvedDependencies;
+    @NonNull
+    private final JavaCompileOptions javaCompileOptions;
     private final boolean isLibrary;
 
     private final Map<String, BuildTypeContainer> buildTypes = Maps.newHashMap();
@@ -65,6 +69,7 @@ class DefaultAndroidProject implements AndroidProject, Serializable {
                           @NonNull List<File> frameworkSource,
                           @NonNull Map<String, SigningConfig> signingConfigs,
                           @NonNull Collection<String> unresolvedDependencies,
+                          @NonNull CompileOptions compileOptions,
                           boolean isLibrary) {
         this.modelVersion = modelVersion;
         this.name = name;
@@ -73,6 +78,7 @@ class DefaultAndroidProject implements AndroidProject, Serializable {
         this.frameworkSource = frameworkSource;
         this.signingConfigs = signingConfigs;
         this.unresolvedDependencies = unresolvedDependencies;
+        javaCompileOptions = new DefaultJavaCompileOptions(compileOptions);
         this.isLibrary = isLibrary;
     }
 
@@ -176,5 +182,11 @@ class DefaultAndroidProject implements AndroidProject, Serializable {
     @Override
     public Collection<String> getUnresolvedDependencies() {
         return unresolvedDependencies;
+    }
+
+    @NonNull
+    @Override
+    public JavaCompileOptions getJavaCompileOptions() {
+        return javaCompileOptions;
     }
 }

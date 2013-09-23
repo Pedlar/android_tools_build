@@ -90,6 +90,7 @@ public class ModelBuilder implements ToolingModelBuilder {
                 frameworkSource,
                 cloneSigningConfigs(signingConfigs),
                 basePlugin.unresolvedDependencies,
+                basePlugin.extension.compileOptions,
                 libPlugin != null)
                     .setDefaultConfig(createPFC(basePlugin.defaultConfigData))
 
