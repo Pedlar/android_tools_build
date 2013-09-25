@@ -126,8 +126,8 @@ import static com.android.builder.BuilderConstants.INSTRUMENT_TEST
 public abstract class BasePlugin {
     protected final static String DIR_BUNDLES = "bundles";
 
-    public static final String GRADLE_MIN_VERSION = "1.6"
-    public static final String[] GRADLE_SUPPORTED_VERSIONS = [ GRADLE_MIN_VERSION, "1.7", "1.8" ]
+    public static final String GRADLE_MIN_VERSION = "1.8"
+    public static final String[] GRADLE_SUPPORTED_VERSIONS = [ GRADLE_MIN_VERSION ]
 
     public static final String INSTALL_GROUP = "Install"
 
@@ -1543,9 +1543,12 @@ public abstract class BasePlugin {
             modules[id] = bundlesForThisModule
 
             def nestedBundles = []
-            moduleVersion.dependencies.each { ResolvedDependencyResult dep ->
-                addDependency(dep.selected, configDependencies, nestedBundles,
-                        jars, modules, artifacts, reverseMap)
+            def dependencies = moduleVersion.dependencies
+            dependencies.each { DependencyResult dep ->
+                if (dep instanceof ResolvedDependencyResult) {
+                    addDependency(dep.selected, configDependencies, nestedBundles,
+                            jars, modules, artifacts, reverseMap)
+                }
             }
 
             def moduleArtifacts = artifacts[id]
