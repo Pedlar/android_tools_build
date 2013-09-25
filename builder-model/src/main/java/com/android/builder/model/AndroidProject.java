@@ -144,4 +144,10 @@ public interface AndroidProject {
      */
     @NonNull
     Collection<String> getUnresolvedDependencies();
+
+    /**
+     * @return the compile options for Java code.
+     */
+    @NonNull
+    JavaCompileOptions getJavaCompileOptions();
 }

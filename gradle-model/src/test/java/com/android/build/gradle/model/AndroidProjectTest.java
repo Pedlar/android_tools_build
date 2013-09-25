@@ -22,6 +22,7 @@ import com.android.builder.model.AndroidProject;
 import com.android.builder.model.ArtifactInfo;
 import com.android.builder.model.BuildTypeContainer;
 import com.android.builder.model.Dependencies;
+import com.android.builder.model.JavaCompileOptions;
 import com.android.builder.model.ProductFlavor;
 import com.android.builder.model.ProductFlavorContainer;
 import com.android.builder.model.SigningConfig;
@@ -154,6 +155,10 @@ public class AndroidProjectTest extends TestCase {
         assertFalse("Library Project", model.isLibrary());
         assertEquals("Compile Target", "android-15", model.getCompileTarget());
         assertFalse("Non empty bootclasspath", model.getBootClasspath().isEmpty());
+
+        JavaCompileOptions javaCompileOptions = model.getJavaCompileOptions();
+        assertEquals("1.6", javaCompileOptions.getSourceCompatibility());
+        assertEquals("1.6", javaCompileOptions.getTargetCompatibility());
     }
 
     public void testBasicSourceProviders() throws Exception {
