@@ -29,7 +29,7 @@ import java.util.Collection;
  * Android Source tree under out/host/<platform>/sdk/... (result of 'make sdk')
  */
 abstract class BuildTest extends BaseTest {
-    private static final Collection<String> IGNORED_GRADLE_VERSIONS = Lists.newArrayList("1.8");
+    private static final Collection<String> IGNORED_GRADLE_VERSIONS = Lists.newArrayList();
 
     protected File testDir;
     protected File sdkDir;
