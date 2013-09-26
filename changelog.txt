@@ -1,3 +1,13 @@
+0.6.0
+
+- Enabled support for Gradle 1.8
+- Gradle 1.8 is now the minimum supported version
+- Default encoding for compiling Java code is UTF-8
+- Users can now specify the encoding to use to compile Java code
+- Fixed Gradle 1.8-specific bugs
+  - Importing projects with missing dependencies was broken
+  - Compiling projects with AIDL files was broken
+
 0.5.7
 
 - Proguard support for libraries.
@@ -8,10 +18,9 @@
 - First lint integration. This is a work in progress and therefore the lint task is not added to the check task.
 - Enable compatibility with 1.8
 
-
 0.5.6
 
-- Enable support for 1.7
+- Enabled support for 1.7
 
 0.5.5
 
@@ -29,17 +38,17 @@
 
 0.5.3
 
-- Fix a crashing bug in PrepareDependenciesTask
+- Fixed a crashing bug in PrepareDependenciesTask
 
 0.5.2
 
 - Better error reporting for cmd line tools, especially
   if run in parallel in spawned threads
-- Fix an issue due to windows path in merged resource files.
+- Fixed an issue due to windows path in merged resource files.
 
 0.5.1
 
-- Fix issue in the dependency checker.
+- Fixed issue in the dependency checker.
 
 0.5.0:
 
@@ -58,10 +67,10 @@
 
 0.4.3:
 
-- enable crunching for all png files, not just .9.png
-- fix dealing with non resource files in res/ and assets/
-- fix crash when doing incremental aidl compilation due to broken method name (ah the joy of Groovy...)
-- clean older R classes when the app package name has changed.
+- Enabled crunching for all png files, not just .9.png
+- Fixed dealing with non resource files in res/ and assets/
+- Fixed crash when doing incremental aidl compilation due to broken method name (ah the joy of Groovy...)
+- Cleaned older R classes when the app package name has changed.
 
 0.4.2
 
