@@ -29,6 +29,10 @@ dependencies {
     groovy localGroovy()
     compile project(':builder')
 
+    compile "com.android.tools:sdklib:$project.ext.baseAndroidVersion"
+    compile "com.android.tools:sdk-common:$project.ext.baseAndroidVersion"
+    compile "com.android.tools:common:$project.ext.baseAndroidVersion"
+
     compile "com.android.tools.lint:lint:$project.ext.baseAndroidVersion"
     compile 'net.sf.proguard:proguard-gradle:4.9'
 
