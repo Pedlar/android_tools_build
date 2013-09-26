@@ -1467,7 +1467,7 @@ public abstract class BasePlugin {
         // files.
         Configuration packageClasspath = variantDeps.packageConfiguration
 
-        if (currentUnresolvedDependencies.isEmpty()) {
+        if (!compileClasspath.resolvedConfiguration.hasError()) {
             Set<File> compileFiles = compileClasspath.files
             Set<File> packageFiles = packageClasspath.files
 
@@ -1484,7 +1484,7 @@ public abstract class BasePlugin {
                             "' is not supported")
                 }
             }
-        } else {
+        } else if (!currentUnresolvedDependencies.isEmpty()) {
             unresolvedDependencies.addAll(currentUnresolvedDependencies)
         }
 
