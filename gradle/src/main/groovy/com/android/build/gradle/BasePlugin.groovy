@@ -697,6 +697,7 @@ public abstract class BasePlugin {
         compileTask.conventionMapping.targetCompatibility = {
             extension.compileOptions.targetCompatibility.toString()
         }
+        compileTask.options.encoding = extension.compileOptions.encoding
 
         // setup the boot classpath just before the task actually runs since this will
         // force the sdk to be parsed.

@@ -25,4 +25,5 @@ class CompileOptions {
 
     JavaVersion sourceCompatibility = JavaVersion.VERSION_1_6
     JavaVersion targetCompatibility = JavaVersion.VERSION_1_6
+    String encoding = "UTF-8"
 }
