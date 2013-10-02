@@ -49,7 +49,7 @@ import java.util.Set;
 
 public class AndroidProjectTest extends TestCase {
 
-    private final static String MODEL_VERSION = "0.6.0-SNAPSHOT";
+    private final static String MODEL_VERSION = "0.6.1-SNAPSHOT";
 
     private static final Map<String, ProjectData> sProjectModelMap = Maps.newHashMap();
 
