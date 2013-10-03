@@ -48,6 +48,9 @@ public class MergeResources extends IncrementalTask {
 
     private final FileValidity<ResourceSet> fileValidity = new FileValidity<ResourceSet>();
 
+    @Nested
+    AaptOptions aaptOptions
+
     @Override
     protected boolean isIncremental() {
         return true
@@ -75,9 +78,11 @@ public class MergeResources extends IncrementalTask {
             merger.addDataSet(resourceSet)
         }
 
+        boolean noCrunch = getAaptOptions() ? getAaptOptions().getNoCrunch() : false
+        project.logger.info(String.format("noCrunch: %s", noCrunch))
         // get the merged set and write it down.
         MergedResourceWriter writer = new MergedResourceWriter(
-                destinationDir, getProcess9Patch() ? builder.aaptRunner : null)
+                destinationDir, getProcess9Patch() ? builder.aaptRunner : null, noCrunch)
 
         try {
             merger.mergeData(writer, false /*doCleanUp*/)
@@ -132,8 +137,10 @@ public class MergeResources extends IncrementalTask {
             }
         }
 
+        boolean noCrunch = getAaptOptions() ? getAaptOptions().getNoCrunch() : false
+        project.logger.info(String.format("noCrunch: %s", noCrunch))
         MergedResourceWriter writer = new MergedResourceWriter(
-                getOutputDir(), getProcess9Patch() ? builder.aaptRunner : null)
+                getOutputDir(), getProcess9Patch() ? builder.aaptRunner : null, noCrunch)
         try {
             merger.mergeData(writer, false /*doCleanUp*/)
         } catch (MergeConsumer.ConsumerException e) {

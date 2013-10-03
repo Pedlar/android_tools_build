@@ -27,6 +27,9 @@ public class AaptOptionsImpl implements AaptOptions {
     @Input
     private List<String> noCompressList
 
+    @Input
+    private boolean noCrunch
+
     public void setIgnoreAssetsPattern(String ignoreAssetsPattern) {
         this.ignoreAssetsPattern = ignoreAssetsPattern
     }
@@ -57,5 +60,14 @@ public class AaptOptionsImpl implements AaptOptions {
 
     public void noCompress(String... noCompress) {
         noCompressList = Arrays.asList(noCompress)
+    }
+
+    @Override 
+    boolean getNoCrunch() {
+        return noCrunch
+    }
+
+    public void setNoCrunch(boolean noCrunch) {
+        this.noCrunch = noCrunch
     }
 }

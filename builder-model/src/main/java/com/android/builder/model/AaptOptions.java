@@ -31,4 +31,9 @@ public interface AaptOptions {
      * Returns the list of values for the -0 (disabled compression) option, or null
      */
     List<String> getNoCompress();
+
+    /**
+     * Returns wether aapt should crunch the png file
+     */
+    boolean getNoCrunch();
 }
